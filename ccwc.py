@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+
 import sys
 import os
+import select
 
 def runCCWC():
     inputArray = sys.argv
@@ -20,13 +23,31 @@ def runCCWC():
         if(case =='-m'):
             print(str(countCharacters(fileData)) + " " + filename)
     else:
+        print(inputArray)
         filename = str(inputArray[1])
         file = open(filename, 'r')
         fileData = file.read()
         print(str(countLines(fileData)) + " " + str(countWords(fileData)) + " " + str(countBytes(filename)) + " " + filename)
 
+def runCCWC2(data, arg):
+    if not arg:
+        print(str(countLines(data)) + " " + str(countWords(data)) + " " + str(countBytes2(data)))
+    else:
+        if(arg =='-c'):
+            print(str(countBytes2(data)))
+        if(arg =='-l'):
+            print(str(countLines(data)))
+        if(arg =='-w'):
+            print(str(countWords(data)))
+        if(arg =='-m'):
+            print(str(countCharacters(data)))
+    return
+
 def countBytes(filename):
     return os.stat(filename).st_size
+
+def countBytes2(string):
+    return len(string.encode('utf-8'))
 
 def countLines(fileData):
     count = 0
@@ -45,4 +66,14 @@ def countCharacters(fileData):
     return count
 
 if __name__ == '__main__':
-    runCCWC()
+    if select.select([sys.stdin, ], [], [], 0.0)[0]:
+        inputArray = sys.argv
+        data = ''
+        for l in sys.stdin:
+            data += l
+        if(len(inputArray) > 1):
+            runCCWC2(data, inputArray[1])
+        else:
+            runCCWC2(data, '')
+    else:
+        runCCWC()
